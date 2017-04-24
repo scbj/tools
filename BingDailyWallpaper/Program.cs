@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SBToolkit.Core.Extensions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,11 +17,20 @@ namespace BingDailyWallpaper
 
         static void Main(string[] args)
         {
+            // Load the settings
+            ApplicationSettings.Load();
+
+            // If the application was launched within the last twelve hours do nothing, return
+            if (ApplicationSettings.Default.LastDownloadTime.ElapsedTime() < TimeSpan.FromHours(12))
+                return;
+
             IEnumerable<Image> images = DownloadImages();
 
             // Set the most recent image as wallpaper.
             Image mostRecentImage = images.OrderByDescending(img => img.Date).First();
             Wallpaper.Set(mostRecentImage.FileName);
+
+            ApplicationSettings.Default.Save();
         }
 
         /// <summary>
@@ -46,6 +56,8 @@ namespace BingDailyWallpaper
                     yield return image;
                 }
             }
+
+            ApplicationSettings.Default.LastDownloadTime = DateTime.Now;
         }
     }
 }

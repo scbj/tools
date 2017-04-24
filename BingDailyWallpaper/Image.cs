@@ -17,6 +17,9 @@ namespace BingDailyWallpaper
         [XmlElement("fullImageUrl")]
         public string Url { get; set; }
 
+        [XmlElement("copyright")]
+        public string Copyright { get; set; }
+
         [XmlIgnore]
         public DateTime Date => DateTime.ParseExact(DateUnformatted, "yyyyMMdd", CultureInfo.InvariantCulture);
 
