@@ -1,10 +1,14 @@
-﻿using SBToolkit.Core.Extensions;
+﻿using BingDailyWallpaper.Models;
+using BingDailyWallpaper.Settings;
+using BingDailyWallpaper.Utils;
+using SBToolkit.Core.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
@@ -17,12 +21,17 @@ namespace BingDailyWallpaper
 
         static void Main(string[] args)
         {
+            if (args.Length == 1 && args[0] == "lazy")
+                Thread.Sleep(10_000);
+
             // Load the settings
             ApplicationSettings.Load();
 
-            // If the application was launched within the last twelve hours do nothing, return
-            if (ApplicationSettings.Default.LastDownloadTime.ElapsedTime() < TimeSpan.FromHours(12))
+#if !DEBUG
+            // If the application was launched within the last two hours do nothing, return
+            if (ApplicationSettings.Default.LastDownloadTime.ElapsedTime() < TimeSpan.FromHours(2))
                 return;
+#endif
 
             IEnumerable<Image> images = DownloadImages();
 
@@ -50,6 +59,7 @@ namespace BingDailyWallpaper
                     var image = serializer.Deserialize(reader) as Image;
 
                     image.FileName = Path.Combine(DefaultDirectoryName, image.Date.ToString("yyyy-MM-dd") + ".jpg");
+
                     if (!File.Exists(image.FileName))
                         client.DownloadFile(image.Url, image.FileName);
 

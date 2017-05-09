@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace BingDailyWallpaper
+namespace BingDailyWallpaper.Models
 {
     [XmlRoot("image")]
     public class Image
