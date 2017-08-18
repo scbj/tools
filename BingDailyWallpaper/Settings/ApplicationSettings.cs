@@ -24,6 +24,8 @@ namespace BingDailyWallpaper.Settings
 
         public DateTime LastDownloadTime { get; set; }
 
+        public string LastDefinedWallpaper { get; set; }
+
         #endregion
 
         #region Public Methods
@@ -46,7 +48,7 @@ namespace BingDailyWallpaper.Settings
         /// </summary>
         private void InitializeDefaultValues()
         {
-            LastDownloadTime = new DateTime(1900, 1, 1);
+            LastDownloadTime = DateTime.MinValue;
         }
 
         #endregion

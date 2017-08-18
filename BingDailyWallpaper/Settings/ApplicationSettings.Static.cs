@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace BingDailyWallpaper.Settings
         #region Fields
 
         private static ApplicationSettings _instance;
-        private static readonly string _fileName = "application.ini";
+        private static readonly string _fileName = "application.json";
 
         #endregion
 
@@ -48,18 +49,21 @@ namespace BingDailyWallpaper.Settings
 
         private static void CreateInstance()
         {
+#if !DEBUG
             if (File.Exists(_fileName))
             {
                 string json = File.ReadAllText(_fileName);
 
                 if (!String.IsNullOrEmpty(json))
+                {
                     _instance = JsonConvert.DeserializeObject<ApplicationSettings>(json);
+                    return;
+                }
             }
-            else
-            {
-                _instance = new ApplicationSettings();
-                _instance.InitializeDefaultValues();
-            }
+#endif
+
+            _instance = new ApplicationSettings();
+            _instance.InitializeDefaultValues();
         }
 
         #endregion
