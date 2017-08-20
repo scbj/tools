@@ -42,6 +42,9 @@ namespace BingDailyWallpaper
             if (ApplicationSettings.Default.LastDefinedWallpaper != mostRecentImage.FileName)
             {
                 Wallpaper.Set(mostRecentImage.FileName);
+#if !DEBUG
+                Thread.Sleep(60_000);
+#endif
                 ShowNotification(mostRecentImage);
                 ApplicationSettings.Default.LastDefinedWallpaper = mostRecentImage.FileName;
             }
@@ -87,6 +90,8 @@ namespace BingDailyWallpaper
 
             ToastContent content = new ToastContent()
             {
+                Duration = ToastDuration.Long,
+
                 Launch = typeof(Program).Namespace,
 
                 Visual = new ToastVisual()
