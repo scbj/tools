@@ -1,6 +1,7 @@
 ﻿using BingDailyWallpaper.Models;
 using BingDailyWallpaper.Settings;
 using BingDailyWallpaper.Utils;
+using BingDailyWallpaper.Web;
 using Microsoft.Toolkit.Uwp.Notifications;
 using SBToolkit.Core.Extensions;
 using System;
@@ -26,30 +27,39 @@ namespace BingDailyWallpaper
         {
             // Load the settings
             ApplicationSettings.Load();
-            
-            // If the application was launched within the last two hours do nothing, return
-            if (ApplicationSettings.Default.LastDownloadTime.ElapsedTime() < TimeSpan.FromHours(2))
-                Environment.Exit(0);
 
-            if (args.Length == 1 && args[0] == "lazy")
-                Thread.Sleep(10_000);
-
-            List<Image> images = DownloadImages();
-
-            // Set the most recent image as wallpaper one time.
-            Image mostRecentImage = images.OrderByDescending(img => img.Date).First();
-            
-            if (ApplicationSettings.Default.LastDefinedWallpaper != mostRecentImage.FileName)
+            try
             {
-                Wallpaper.Set(mostRecentImage.FileName);
-#if !DEBUG
-                Thread.Sleep(60_000);
-#endif
-                ShowNotification(mostRecentImage);
-                ApplicationSettings.Default.LastDefinedWallpaper = mostRecentImage.FileName;
-            }
 
-            ApplicationSettings.Default.Save();
+                // If the application was launched within the last one hour do nothing, return
+                if (ApplicationSettings.Default.LastDownloadTime.ElapsedTime() < TimeSpan.FromHours(1))
+                    Environment.Exit(0);
+
+                if (args.Length == 1 && args[0] == "lazy")
+                    Thread.Sleep(10_000);
+
+                List<Image> images = DownloadImages();
+
+                // Set the most recent image as wallpaper one time.
+                Image mostRecentImage = images.OrderByDescending(img => img.Date).First();
+
+                if (ApplicationSettings.Default.LastDefinedWallpaper != mostRecentImage.FileName)
+                {
+                    Wallpaper.Set(mostRecentImage.FileName);
+
+                    ShowNotification(mostRecentImage);
+                    ApplicationSettings.Default.LastDefinedWallpaper = mostRecentImage.FileName;
+                }
+            }
+            catch (Exception ex)
+            {
+                ApplicationSettings.Default.AfterCrash = true;
+                ApplicationSettings.Default.CrashException = ex.ToString();
+            }
+            finally
+            {
+                ApplicationSettings.Default.Save();
+            }
         }
 
         /// <summary>
@@ -62,19 +72,29 @@ namespace BingDailyWallpaper
             var client = new WebClient();
             var serializer = new XmlSerializer(typeof(Image));
 
-            for (int i = 0; i <= 8; i++)
+            for (int i = 0; i < 8; i++)
             {
-                string xml = client.DownloadString(String.Format(XmlUrl, i));
-                using (var reader = new StringReader(xml))
+                try
                 {
-                    var image = serializer.Deserialize(reader) as Image;
+                    string xml = client.TryDownloadString(String.Format(XmlUrl, i));
+                    
+                    using (var reader = new StringReader(xml))
+                    {
+                        var image = serializer.Deserialize(reader) as Image;
 
-                    image.FileName = Path.Combine(DefaultDirectoryName, image.Date.ToString("yyyy-MM-dd") + ".jpg");
+                        image.FileName = Path.Combine(DefaultDirectoryName, image.Date.ToString("yyyy-MM-dd") + ".jpg");
 
-                    if (!File.Exists(image.FileName))
-                        client.DownloadFile(image.Url, image.FileName);
+                        if (!File.Exists(image.FileName))
+                        {
+                            client.TryDownloadFile(image.Url, image.FileName);
+                        }
 
-                    images.Add(image);
+                        images.Add(image);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(String.Format(XmlUrl, i));
                 }
             }
 

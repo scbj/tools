@@ -26,6 +26,10 @@ namespace BingDailyWallpaper.Settings
 
         public string LastDefinedWallpaper { get; set; }
 
+        public bool AfterCrash { get; set; }
+
+        public string CrashException { get; set; }
+
         #endregion
 
         #region Public Methods
@@ -49,6 +53,8 @@ namespace BingDailyWallpaper.Settings
         private void InitializeDefaultValues()
         {
             LastDownloadTime = DateTime.MinValue;
+            AfterCrash = false;
+            CrashException = null;
         }
 
         #endregion
