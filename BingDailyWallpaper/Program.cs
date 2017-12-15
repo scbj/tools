@@ -1,147 +1,89 @@
 ﻿using BingDailyWallpaper.Models;
-using BingDailyWallpaper.Settings;
+using BingDailyWallpaper.Notification;
+using BingDailyWallpaper.Storage;
 using BingDailyWallpaper.Utils;
 using BingDailyWallpaper.Web;
-using Microsoft.Toolkit.Uwp.Notifications;
 using SBToolkit.Core.Extensions;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Windows.Data.Xml.Dom;
-using Windows.UI.Notifications;
 
 namespace BingDailyWallpaper
 {
-    class Program
+    public class Program
     {
-        const string XmlUrl = "http://az517271.vo.msecnd.net/TodayImageService.svc/HPImageArchive?&mkt=en-ww&idx={0}";
-        const string DefaultDirectoryName = @"D:\Sacha\OneDrive\Images\Fonds d'écran\Bing";
-
+        /// <summary>
+        /// Entry point.
+        /// </summary>
         static void Main(string[] args)
         {
-            // Load the settings
-            ApplicationSettings.Load();
+            ProcessArguments(args);
+
+            var program = new Program();
+
+            program.Run();
+        }
+
+        /// <summary>
+        /// Handle lazy loading.
+        /// </summary>
+        private static void ProcessArguments(string[] args)
+        {
+            if (args.Length == 1 && args[0] == "lazy")
+                Thread.Sleep(10_000);
+        }
+
+        private void Run()
+        {
+            Settings.Load();
 
             try
             {
-
                 // If the application was launched within the last one hour do nothing, return
-                if (ApplicationSettings.Default.LastDownloadTime.ElapsedTime() < TimeSpan.FromHours(1))
-                    Environment.Exit(0);
-
-                if (args.Length == 1 && args[0] == "lazy")
-                    Thread.Sleep(10_000);
-
-                List<Image> images = DownloadImages();
-
-                // Set the most recent image as wallpaper one time.
-                Image mostRecentImage = images.OrderByDescending(img => img.Date).First();
-
-                if (ApplicationSettings.Default.LastDefinedWallpaper != mostRecentImage.FileName)
+                if (Settings.Current.LastDownloadTime.ElapsedTime() < TimeSpan.FromHours(1))
                 {
-                    Wallpaper.Set(mostRecentImage.FileName);
-
-                    ShowNotification(mostRecentImage);
-                    ApplicationSettings.Default.LastDefinedWallpaper = mostRecentImage.FileName;
+                    Environment.Exit(0);
                 }
+
+                DownloadImages()
+                    .Store()
+                    .SetWallpaper()
+                    .Notify();
             }
             catch (Exception ex)
             {
-                ApplicationSettings.Default.AfterCrash = true;
-                ApplicationSettings.Default.CrashException = ex.ToString();
+                Debug.WriteLine(ex.ToString());
             }
             finally
             {
-                ApplicationSettings.Default.Save();
+                Settings.Current.Save();
             }
         }
 
         /// <summary>
-        /// Download the last eight daily Bing images.
+        /// Download the list of images. 
         /// </summary>
-        /// <returns></returns>
-        private static List<Image> DownloadImages()
+        private IEnumerable<Image> DownloadImages()
         {
-            var images = new List<Image>();
             var client = new WebClient();
             var serializer = new XmlSerializer(typeof(Image));
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < Bing.MaxArchive; i++)
             {
-                try
-                {
-                    string xml = client.TryDownloadString(String.Format(XmlUrl, i));
-                    
-                    using (var reader = new StringReader(xml))
-                    {
-                        var image = serializer.Deserialize(reader) as Image;
+                string url = String.Format(Bing.ArchiveUrl, i);
 
-                        image.FileName = Path.Combine(DefaultDirectoryName, image.Date.ToString("yyyy-MM-dd") + ".jpg");
+                string xml = client.TryDownloadString(url);
 
-                        if (!File.Exists(image.FileName))
-                        {
-                            client.TryDownloadFile(image.Url, image.FileName);
-                        }
-
-                        images.Add(image);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(String.Format(XmlUrl, i));
-                }
+                yield return Image.Parse(serializer, xml);
             }
 
-            ApplicationSettings.Default.LastDownloadTime = DateTime.Now;
-
-            return images;
-        }
-
-        private static void ShowNotification(Image image)
-        {
-            int position = image.Copyright.LastIndexOf(" (");
-            string copyright = image.Copyright.Substring(0, position);
-
-            ToastContent content = new ToastContent()
-            {
-                Duration = ToastDuration.Long,
-
-                Launch = typeof(Program).Namespace,
-
-                Visual = new ToastVisual()
-                {
-                    BindingGeneric = new ToastBindingGeneric()
-                    {
-                        Children =
-                        {
-                            new AdaptiveText()
-                            {
-                                Text = copyright
-                            },
-                            new AdaptiveText()
-                            {
-                                Text = "Nouveau fond d'écran 📸"
-                            },
-                            new AdaptiveImage()
-                            {
-                                Source = image.FileName
-                            }
-                        }
-                    }
-                }
-            };
-
-            var doc = new XmlDocument();
-            doc.LoadXml(content.GetContent());
-
-            var toast = new ToastNotification(doc);
-            ToastNotificationManager.CreateToastNotifier("Test").Show(toast);
+            Settings.Current.LastDownloadTime = DateTime.Now;
         }
     }
 }

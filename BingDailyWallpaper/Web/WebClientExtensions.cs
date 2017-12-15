@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BingDailyWallpaper.Web
 {
     public static class WebClientExtensions
     {
-        public const int DefaultRetryCount = 3;
+        public const int DefaultRetryCount = 4;
 
         /// <summary>
         /// Try toownloads the requested resource as a System.String. The resource to download
@@ -21,14 +22,14 @@ namespace BingDailyWallpaper.Web
 
             do
             {
+                if (count > 0)
+                {
+                    Thread.Sleep(200);
+                }
+
                 try
                 {
-                    string data = client.DownloadString(address);
-
-                    if (data != null)
-                    {
-                        return data;
-                    }
+                    return client.DownloadString(address);
                 }
                 catch (Exception)
                 {
@@ -43,15 +44,20 @@ namespace BingDailyWallpaper.Web
         /// </summary>
         /// <param name="address">The URI from which to download data.</param>
         /// <param name="fileName">The name of the local file that is to receive the data.</param>
-        public static void TryDownloadFile(this WebClient client, string address, string fileName)
+        public static void TryDownloadFileAsync(this WebClient client, string address, string fileName)
         {
             int count = 0;
 
             do
             {
+                if (count > 0)
+                {
+                    Thread.Sleep(200);
+                }
+
                 try
                 {
-                    client.DownloadFile(address, fileName);
+                    client.DownloadFileAsync(new Uri(address), fileName);
                 }
                 catch (Exception)
                 {

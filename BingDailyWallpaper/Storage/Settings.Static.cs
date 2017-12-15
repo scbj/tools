@@ -7,25 +7,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BingDailyWallpaper.Settings
+namespace BingDailyWallpaper.Storage
 {
-    public sealed partial class ApplicationSettings
+    public sealed partial class Settings
     {
         #region Fields
 
-        private static ApplicationSettings _instance;
+        private static Settings _instance;
         private static readonly string _fileName = "application.json";
 
         #endregion
 
         #region Properties
 
-        public static ApplicationSettings Default
+        public static Settings Current
         {
             get
             {
                 if (_instance == null)
-                    CreateInstance();
+                    Load();
 
                 return _instance;
             }
@@ -56,14 +56,13 @@ namespace BingDailyWallpaper.Settings
 
                 if (!String.IsNullOrEmpty(json))
                 {
-                    _instance = JsonConvert.DeserializeObject<ApplicationSettings>(json);
+                    _instance = JsonConvert.DeserializeObject<Settings>(json);
                     return;
                 }
             }
 #endif
 
-            _instance = new ApplicationSettings();
-            _instance.InitializeDefaultValues();
+            _instance = new Settings();
         }
 
         #endregion

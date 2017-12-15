@@ -1,4 +1,7 @@
-﻿using Microsoft.Win32;
+﻿using BingDailyWallpaper.Models;
+using BingDailyWallpaper.Notification;
+using BingDailyWallpaper.Storage;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace BingDailyWallpaper.Utils
 {
-    public sealed class Wallpaper
+    public static class Wallpaper
     {
         const int SPI_SETDESKWALLPAPER = 20;
         const int SPIF_UPDATEINIFILE = 0x01;
@@ -37,6 +40,25 @@ namespace BingDailyWallpaper.Utils
             key.SetValue(@"TileWallpaper", 0.ToString());
 
             SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, tempPath, SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
+        }
+
+        /// <summary>
+        /// Set the most recent image as wallpaper if it is different.
+        /// </summary>
+        /// <param name="images">The list that contains the image</param>
+        public static Image SetWallpaper(this IEnumerable<Image> images)
+        {
+            Image mostRecentImage = images.OrderByDescending(x => x.Date).FirstOrDefault();
+
+            if (mostRecentImage?.FileName == Settings.Current.LastDefinedWallpaper)
+            {
+                return null;
+            }
+
+            Set(mostRecentImage.FileName);
+            Settings.Current.LastDefinedWallpaper = mostRecentImage.FileName;
+
+            return mostRecentImage;
         }
     }
 }
