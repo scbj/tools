@@ -1,8 +1,8 @@
 ﻿using BingDailyWallpaper.Models;
 using BingDailyWallpaper.Storage;
 using Microsoft.Toolkit.Uwp.Notifications;
-using Windows.Data.Xml.Dom;
-using Windows.UI.Notifications;
+//using Windows.Data.Xml.Dom;
+//using Windows.UI.Notifications;
 
 namespace BingDailyWallpaper.Notification
 {
@@ -47,20 +47,20 @@ namespace BingDailyWallpaper.Notification
         /// Notifies the user that the wallpaper has changed.
         /// </summary>
         /// <param name="image">The new wallpaper. If it is no notification is displayed</param>
-        public static void Notify(this Image image)
-        {
-            if (image == null || Settings.Current.NotificationEnabled == false)
-            {
-                return;
-            }
+        //public static void Notify(this Image image)
+        //{
+        //    if (image == null || Settings.Current.NotificationEnabled == false)
+        //    {
+        //        return;
+        //    }
 
-            ToastContent content = CreateToastContent(image);
+        //    ToastContent content = CreateToastContent(image);
 
-            var doc = new XmlDocument();
-            doc.LoadXml(content.GetContent());
+        //    var doc = new XmlDocument();
+        //    doc.LoadXml(content.GetContent());
 
-            var toast = new ToastNotification(doc);
-            ToastNotificationManager.CreateToastNotifier("Test").Show(toast);
-        }
+        //    var toast = new ToastNotification(doc);
+        //    ToastNotificationManager.CreateToastNotifier("Test").Show(toast);
+        //}
     }
 }

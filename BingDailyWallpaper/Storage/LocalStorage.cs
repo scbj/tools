@@ -40,7 +40,9 @@ namespace BingDailyWallpaper.Storage
                     client = new WebClient();
                 }
 
-                client.TryDownloadFileAsync(image.Url, image.FileName);
+                string url = $"{Bing.BaseImageUrl}{image.RelativeUrl}";
+
+                client.TryDownloadFileAsync(url, image.FileName);
             }
         }
     }

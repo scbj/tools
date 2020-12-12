@@ -11,8 +11,8 @@ namespace BingDailyWallpaper.Storage
 {
     public sealed partial class Settings
     {
-        #region Fields
 
+        #region Fields
         private DateTime _lastDownloadTime;
         private string _lastDefinedWallpaper;
         private string _localDirectoryPath;
@@ -29,6 +29,8 @@ namespace BingDailyWallpaper.Storage
         #endregion
 
         #region Properties
+
+        public bool IsSetWallpaperEnabled { get; set; } = false;
 
         public DateTime LastDownloadTime
         {

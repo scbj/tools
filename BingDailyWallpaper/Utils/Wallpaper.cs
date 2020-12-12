@@ -48,6 +48,7 @@ namespace BingDailyWallpaper.Utils
         /// <param name="images">The list that contains the image</param>
         public static Image SetWallpaper(this IEnumerable<Image> images)
         {
+
             Image mostRecentImage = images.OrderByDescending(x => x.Date).FirstOrDefault();
 
             if (mostRecentImage?.FileName == Settings.Current.LastDefinedWallpaper)
@@ -55,7 +56,11 @@ namespace BingDailyWallpaper.Utils
                 return null;
             }
 
-            Set(mostRecentImage.FileName);
+            if (Settings.Current.IsSetWallpaperEnabled == true)
+            {
+                Set(mostRecentImage.FileName);
+            }
+
             Settings.Current.LastDefinedWallpaper = mostRecentImage.FileName;
 
             return mostRecentImage;

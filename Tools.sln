@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26228.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BingDailyWallpaper", "BingDailyWallpaper\BingDailyWallpaper.csproj", "{F1C36674-E27A-4BAD-8D86-623F906903A9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileDateTravel", "FileDateTravel\FileDateTravel.csproj", "{12BB2FF8-11B2-444C-BA3B-4D5627A0BC15}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,8 +17,15 @@ Global
 		{F1C36674-E27A-4BAD-8D86-623F906903A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1C36674-E27A-4BAD-8D86-623F906903A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1C36674-E27A-4BAD-8D86-623F906903A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12BB2FF8-11B2-444C-BA3B-4D5627A0BC15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12BB2FF8-11B2-444C-BA3B-4D5627A0BC15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12BB2FF8-11B2-444C-BA3B-4D5627A0BC15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12BB2FF8-11B2-444C-BA3B-4D5627A0BC15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DE837865-1A3A-4BFC-8009-F03E665098C0}
 	EndGlobalSection
 EndGlobal

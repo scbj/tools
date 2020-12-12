@@ -1,5 +1,4 @@
 ﻿using BingDailyWallpaper.Models;
-using BingDailyWallpaper.Notification;
 using BingDailyWallpaper.Storage;
 using BingDailyWallpaper.Utils;
 using BingDailyWallpaper.Web;
@@ -7,12 +6,8 @@ using SBToolkit.Core.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace BingDailyWallpaper
 {
@@ -53,8 +48,8 @@ namespace BingDailyWallpaper
 
                 DownloadImages()
                     .Store()
-                    .SetWallpaper()
-                    .Notify();
+                    .SetWallpaper();
+                    //.Notify();
             }
             catch (Exception ex)
             {
@@ -72,18 +67,8 @@ namespace BingDailyWallpaper
         private IEnumerable<Image> DownloadImages()
         {
             var client = new WebClient();
-            var serializer = new XmlSerializer(typeof(Image));
-
-            for (int i = 0; i < Bing.MaxArchive; i++)
-            {
-                string url = String.Format(Bing.ArchiveUrl, i);
-
-                string xml = client.TryDownloadString(url);
-
-                yield return Image.Parse(serializer, xml);
-            }
-
-            Settings.Current.LastDownloadTime = DateTime.Now;
+            string json = client.TryDownloadString(Bing.ArchiveUrl2);
+            return BingResponse.Parse(json).Images;
         }
     }
 }
